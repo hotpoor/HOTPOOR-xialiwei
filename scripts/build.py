@@ -53,7 +53,8 @@ def timeline(current, selected=None):
     for e in ENTRIES:
         active = ' aria-current="step"' if e['id'] == selected else ''
         nodes.append(f'<li><a href="{rel(current, article_path(e))}"{active}><span class="dot"></span><time datetime="{e["date"]}">{e["date"].replace("-", ".")}</time><strong>{esc(e["title"])}</strong><span class="timeline-kind">{esc(e["kind"])}</span></a></li>')
-    return '<section class="timeline-section" aria-label="横向时间轴"><div class="section-line"><span>时间轴 <small>2012 — 2026</small></span><div class="timeline-tools"><span class="timeline-hint">按记录节点排列 · 可横向滑动</span><button type="button" data-scroll="-1" aria-label="向前浏览时间轴" aria-controls="timeline">←</button><button type="button" data-scroll="1" aria-label="向后浏览时间轴" aria-controls="timeline">→</button></div></div><ol id="timeline" class="timeline" tabindex="0" aria-label="从左向右按时间正序排列">' + ''.join(nodes) + '</ol></section>'
+    years = f"{ENTRIES[0]['date'][:4]} — {max(CAT['updated'][:4], ENTRIES[-1]['date'][:4])}"
+    return f'<section class="timeline-section" aria-label="横向时间轴"><div class="section-line"><span>时间轴 <small>{years}</small></span><div class="timeline-tools"><span class="timeline-hint">按起始或记录时间排列 · 可横向滑动</span><button type="button" data-scroll="-1" aria-label="向前浏览时间轴" aria-controls="timeline">←</button><button type="button" data-scroll="1" aria-label="向后浏览时间轴" aria-controls="timeline">→</button></div></div><ol id="timeline" class="timeline" tabindex="0" aria-label="从左向右按时间正序排列">' + ''.join(nodes) + '</ol></section>'
 
 
 def sidebar(current, selected=None, extra=''):
@@ -61,7 +62,7 @@ def sidebar(current, selected=None, extra=''):
     for i, c in enumerate(CAT['chapters'], 1):
         label = f'<span>{i:02d}</span>{esc(c["title"])}'
         links += '<li>' + navlink(current, 'chapters/' + c['id'] + '/index.html', label, selected == c['id']) + '</li>'
-    return f'<aside class="sidebar"><details open><summary>章节目录 <span>04</span></summary><ol>{links}</ol></details>{extra}<div class="sidebar-note">记录可以补充，判断可以修正。<br>让来路有迹可循。</div></aside>'
+    return f'<aside class="sidebar"><details open><summary>章节目录 <span>{len(CAT["chapters"]):02d}</span></summary><ol>{links}</ol></details>{extra}<div class="sidebar-note">记录可以补充，判断可以修正。<br>让来路有迹可循。</div></aside>'
 
 
 def shell(current, title, description, content, active='', selected=None):
@@ -180,7 +181,7 @@ def main():
         build_article(e)
     build_chapters()
     current = 'about/index.html'
-    about = '''<main id="main" class="about prose"><h2>本人授权，持续整理</h2><p>这是 HOTPOOR · XIALIWEI 的经历、产品实践与协作记录。由本人提供经历与立场，AI 协助整理和搭建，经本人要求公开。本版整理于 2026 年 9 月 26 日。</p><h2>日期与证据</h2><p>每篇标明本人自述、共同约定、项目核验或对话整理等来源类型，正文保留具体来源和范围。只知道年份时不补写月日；约定记录日、产品定位记录日与实际起始时间分别说明。同日记录按编辑顺序排列，时间轴节点等距展示，不按真实时间跨度缩放。</p><h2>阅读与修订</h2><p>History 按时间正序，News 按时间逆序，每页四篇。章节目录按主题汇集文章，每篇另有正文目录。网页和 Markdown 从同一批原稿生成；修订通过 GitHub 的版本记录保留。</p><h2>公开内容范围</h2><p>收录本人已讲述并要求公开的内容与已有公开项目证据，不包含凭证、私人录音、第三方私人聊天或身份信息。转写不清楚的片段没有被补写成事实。新证据出现时，可以补充与修正。</p></main>'''
+    about = '''<main id="main" class="about prose"><h2>本人授权，持续整理</h2><p>这是 HOTPOOR · XIALIWEI 的经历、产品实践与协作记录。由本人提供经历与立场，AI 协助整理和搭建，经本人要求公开。本版整理于 2026 年 9 月 26 日。</p><h2>日期与证据</h2><p>每篇标明本人自述、共同约定、项目核验或对话整理等来源类型，正文保留具体来源和范围。只知道年份时不补写月日；约定记录日、产品定位记录日与实际起始时间分别说明。同日记录按编辑顺序排列，时间轴节点等距展示，不按真实时间跨度缩放。</p><h2>PDF 经历与暂定日期</h2><p>本次从本人提供的《HOTPOOR+LAB 的基于人群覆盖论》第 3—18 页整理了 16 篇经历，逐篇标注来源。文件名标记 20250807，封面写更新至 2023.4.4，正文含更晚记录，具体修订日期待统一。校园配送、格斗机器人、FindMaster、爱味觉的“至今”，依本人要求暂按 2026-09-26 计，后续修正；这不是独立核验的运营截止日。项目按起始时间排序，复盘可能包含后来的回看。公开版省略第三方私人身份细节。</p><h2>阅读与修订</h2><p>History 按时间正序，News 按时间逆序，每页四篇。章节目录按主题汇集文章，每篇另有正文目录。网页和 Markdown 从同一批原稿生成；修订通过 GitHub 的版本记录保留。</p><h2>公开内容范围</h2><p>收录本人已讲述并要求公开的内容与已有公开项目证据，不包含凭证、私人录音、第三方私人聊天或身份信息。转写不清楚的片段没有被补写成事实。新证据出现时，可以补充与修正。</p></main>'''
     write(OUT / current, shell(current, '关于这些记录', '保留原意，注明来处，也留下修正的空间。', about))
     print(f'Built {len(ENTRIES)} stories, {len(CHAPTERS)} chapters, {len(list(OUT.rglob("*.html")))} HTML pages.')
 
