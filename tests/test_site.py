@@ -96,7 +96,7 @@ class SiteTests(unittest.TestCase):
             self.assertIn('暂', entry['date_label'])
             self.assertIn('2026-09-26', build.body(entry))
         home = (build.OUT / 'index.html').read_text(encoding='utf-8')
-        self.assertIn('2011 — 2026', home)
+        self.assertIn('2007 — 2026', home)
         self.assertIn(f'章节目录 <span>{len(build.CHAPTERS):02d}</span>', home)
 
     def test_public_site_contains_no_local_paths_or_credentials(self):

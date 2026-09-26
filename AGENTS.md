@@ -12,6 +12,8 @@
 
 ## 内容与生成
 
+- 用户的时间口径（2026-09-26 补充）：优先按本人讲述的实际事件记录阶段起止，不套用常规开学月份。高中在延吉中学，明确记为 2007-07 至 2010-07；收到录取通知书、参加过返校日即视为经历开始，不擅自改为 9 月。具体事件日期和球友相识日期未明确时仍保留未知，不从阶段范围推断。
+
 - `content/stories/` 是逐篇 Markdown 原稿；`content/catalog.json` 保存目录、日期精度、章节与摘要。
 - `history/`、`news/`、`chapters/` 是生成的 Markdown 阅读目录；`_site/` 为忽略提交的网页产物。
 - 修改原稿和目录后执行 `python scripts/build.py`、`python -m unittest discover -s tests` 与 `git diff --check`。不要仅修改生成目录。
