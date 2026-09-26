@@ -21,7 +21,7 @@
 
 2026.09.26 · 对话日期 · 对话整理 · 整理于 2026-09-26
 
-[独立原稿](../content/stories/2026-09-26-understanding.md) · [网页阅读](https://hotpoor.github.io/HOTPOOR-xialiwei/stories/2026-09-26-understanding/index.html)
+[独立原稿](../content/stories/2026-09-26-understanding.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-26-understanding/index.html)
 
 ### “还记得我是谁？”
 
@@ -57,7 +57,7 @@
 
 2026.09.25 · 开发复盘日 · 开发复盘 · 整理于 2026-09-26
 
-[独立原稿](../content/stories/2026-09-25-debugging.md) · [网页阅读](https://hotpoor.github.io/HOTPOOR-xialiwei/stories/2026-09-25-debugging/index.html)
+[独立原稿](../content/stories/2026-09-25-debugging.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-25-debugging/index.html)
 
 ### 看到成功的对照，再追问原因
 
@@ -91,7 +91,7 @@ SayAgain 的截图功能曾遇到问题。我们排查时，有一个重要线�
 
 2026.09.25 · 核验日期 · 项目核验 · 整理于 2026-09-26
 
-[独立原稿](../content/stories/2026-09-25-model-evidence.md) · [网页阅读](https://hotpoor.github.io/HOTPOOR-xialiwei/stories/2026-09-25-model-evidence/index.html)
+[独立原稿](../content/stories/2026-09-25-model-evidence.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-25-model-evidence/index.html)
 
 ### 从一个具体效果开始
 
@@ -147,7 +147,7 @@ SayAgain 的截图功能曾遇到问题。我们排查时，有一个重要线�
 
 2026.09.25 · 产品定位记录日 · 产品实践 · 整理于 2026-09-26
 
-[独立原稿](../content/stories/2026-09-25-sayagain.md) · [网页阅读](https://hotpoor.github.io/HOTPOOR-xialiwei/stories/2026-09-25-sayagain/index.html)
+[独立原稿](../content/stories/2026-09-25-sayagain.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-25-sayagain/index.html)
 
 ### 先把表达说得更自然
 

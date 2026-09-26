@@ -6,7 +6,7 @@
 
 ## 阅读入口
 
-- [网页版本 · 横向时间轴](https://hotpoor.github.io/HOTPOOR-xialiwei/)
+- [网页版本 · 横向时间轴](https://github.xialiwei.com/HOTPOOR-xialiwei/)
 - [History · 按时间正序](history/README.md)
 - [News · 按时间逆序](news/README.md)
 - [章节总目录](chapters/README.md)
@@ -56,5 +56,7 @@ python -m http.server 8000 --directory _site
 访问 `http://localhost:8000`。生成的网页在 `_site/`，不提交；生成的 `history/`、`news/`、`chapters/` 与原稿一起提交。
 
 主分支更新后，GitHub Actions 自动构建、检查并发布到 GitHub Pages。仓库 Settings → Pages 的 Source 使用 GitHub Actions。部署配置依据 [GitHub Pages 官方工作流说明](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)。
+
+本站沿用账号已有的 Pages 域名 `github.xialiwei.com`，启用 HTTPS。默认的 `hotpoor.github.io/HOTPOOR-xialiwei/` 地址会跳转到该域名；站点公开地址保存在 `content/catalog.json` 的 `site_url` 中。
 
 无需服务器、数据库或 AI API 凭证。

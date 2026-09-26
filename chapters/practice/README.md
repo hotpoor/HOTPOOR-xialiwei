@@ -18,7 +18,7 @@
 
 2026.09.23 · 约定记录日 · 实践记录 · 整理于 2026-09-26
 
-[独立原稿](../../content/stories/2026-09-23-language.md) · [网页阅读](https://hotpoor.github.io/HOTPOOR-xialiwei/stories/2026-09-23-language/index.html)
+[独立原稿](../../content/stories/2026-09-23-language.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-23-language/index.html)
 
 ### 在做事情的时候练习
 
@@ -52,7 +52,7 @@
 
 2026.09.25 · 产品定位记录日 · 产品实践 · 整理于 2026-09-26
 
-[独立原稿](../../content/stories/2026-09-25-sayagain.md) · [网页阅读](https://hotpoor.github.io/HOTPOOR-xialiwei/stories/2026-09-25-sayagain/index.html)
+[独立原稿](../../content/stories/2026-09-25-sayagain.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-25-sayagain/index.html)
 
 ### 先把表达说得更自然
 
@@ -93,7 +93,7 @@ SayAgain 保留原始表达和修改建议，也强调原音频、区间、文�
 
 2026.09.25 · 开发复盘日 · 开发复盘 · 整理于 2026-09-26
 
-[独立原稿](../../content/stories/2026-09-25-debugging.md) · [网页阅读](https://hotpoor.github.io/HOTPOOR-xialiwei/stories/2026-09-25-debugging/index.html)
+[独立原稿](../../content/stories/2026-09-25-debugging.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-25-debugging/index.html)
 
 ### 看到成功的对照，再追问原因
 

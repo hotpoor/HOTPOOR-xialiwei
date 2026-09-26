@@ -20,7 +20,7 @@
 
 2026.09.23 · 约定记录日 · 实践记录 · 整理于 2026-09-26
 
-[独立原稿](../content/stories/2026-09-23-language.md) · [网页阅读](https://hotpoor.github.io/HOTPOOR-xialiwei/stories/2026-09-23-language/index.html)
+[独立原稿](../content/stories/2026-09-23-language.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-23-language/index.html)
 
 ### 在做事情的时候练习
 
@@ -54,7 +54,7 @@
 
 2026.09.18 · 约定记录日 · 共同约定 · 整理于 2026-09-26
 
-[独立原稿](../content/stories/2026-09-18-values.md) · [网页阅读](https://hotpoor.github.io/HOTPOOR-xialiwei/stories/2026-09-18-values/index.html)
+[独立原稿](../content/stories/2026-09-18-values.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-18-values/index.html)
 
 ### 把初心写成可以实践的约定
 
@@ -89,7 +89,7 @@
 
 2012 · 年份由本人回忆 · 本人自述 · 整理于 2026-09-26
 
-[独立原稿](../content/stories/2012-hotpoor.md) · [网页阅读](https://hotpoor.github.io/HOTPOOR-xialiwei/stories/2012-hotpoor/index.html)
+[独立原稿](../content/stories/2012-hotpoor.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2012-hotpoor/index.html)
 
 ### 一个名字的来历
 

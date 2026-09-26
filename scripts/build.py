@@ -15,7 +15,7 @@ CAT = json.loads((ROOT / 'content/catalog.json').read_text(encoding='utf-8'))
 ENTRIES = sorted(CAT['entries'], key=lambda e: e['date'])
 CHAPTERS = {c['id']: c for c in CAT['chapters']}
 REPO = 'https://github.com/hotpoor/HOTPOOR-xialiwei'
-PUBLIC = 'https://hotpoor.github.io/HOTPOOR-xialiwei/'
+PUBLIC = CAT['site_url']
 esc = html.escape
 
 

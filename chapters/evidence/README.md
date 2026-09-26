@@ -16,7 +16,7 @@
 
 2026.09.25 · 核验日期 · 项目核验 · 整理于 2026-09-26
 
-[独立原稿](../../content/stories/2026-09-25-model-evidence.md) · [网页阅读](https://hotpoor.github.io/HOTPOOR-xialiwei/stories/2026-09-25-model-evidence/index.html)
+[独立原稿](../../content/stories/2026-09-25-model-evidence.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-25-model-evidence/index.html)
 
 ### 从一个具体效果开始
 

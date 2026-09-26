@@ -16,7 +16,7 @@
 
 2026.09.26 · 对话日期 · 对话整理 · 整理于 2026-09-26
 
-[独立原稿](../../content/stories/2026-09-26-understanding.md) · [网页阅读](https://hotpoor.github.io/HOTPOOR-xialiwei/stories/2026-09-26-understanding/index.html)
+[独立原稿](../../content/stories/2026-09-26-understanding.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-26-understanding/index.html)
 
 ### “还记得我是谁？”
 
