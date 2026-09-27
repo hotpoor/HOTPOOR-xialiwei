@@ -39,10 +39,22 @@ def publish(config_path, state_path):
     editor.validate_envelope(envelope, record_id)
     placeholder = 'content/stories/' + record_id + '.md'
     def allowed(name):
-        # Only this editor's encrypted output may precede a publish operation.
-        return name == envelope_name
+        # Other encrypted drafts can stay unstaged while publishing this document.
+        if name == envelope_name:
+            return True
+        match = re.fullmatch(r'content/encrypted/([a-z0-9-]+)\.json', name)
+        if not match:
+            return False
+        try:
+            editor.validate_envelope(json.loads((ROOT / name).read_text(encoding='utf-8')), match[1])
+            return True
+        except (ValueError, OSError, TypeError, KeyError):
+            return False
+    staged = set(run(['git', 'diff', '--cached', '--name-only']).splitlines())
+    if staged - {envelope_name}:
+        raise RuntimeError('暂存区还有其他文档或代码，未混入本篇发布。')
     dirty = set(run(['git', 'diff', '--name-only']).splitlines())
-    dirty.update(run(['git', 'diff', '--cached', '--name-only']).splitlines())
+    dirty.update(staged)
     dirty.update(run(['git', 'ls-files', '--others', '--exclude-standard']).splitlines())
     if any(not allowed(name) for name in dirty):
         raise RuntimeError('还有本篇以外的未提交改动，未自动混入发布。请先处理这些改动。')

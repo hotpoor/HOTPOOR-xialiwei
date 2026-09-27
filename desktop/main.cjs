@@ -37,13 +37,16 @@ else {
    });
    window.webContents.on('will-navigate',(event,url)=>{if(url!==origin+'/')event.preventDefault();});
    const valid=event=>event.sender===window.webContents && event.senderFrame?.url===origin+'/';
-   ipcMain.handle('archive:publish',async event=>{
+   ipcMain.handle('archive:publish',async (event,id)=>{
     if(!valid(event)||publishing)throw Error('发布请求不可用。');
+    const active=JSON.parse(fs.readFileSync(configPath,'utf8'));
+    if(id!==active.id)throw Error('文档已切换，请重新选择。');
+    const activeState=path.join(path.dirname(active.draft),active.id+'.state.json');
     publishing=true;busy=true;
     try {
      const result=await new Promise(resolve=>{
       let output='';
-      const proc=spawn(python,['scripts/publish-record.py','--config',configPath,'--state',state],{cwd:root,windowsHide:true,stdio:['ignore','pipe','pipe']});
+      const proc=spawn(python,['scripts/publish-record.py','--config',configPath,'--state',activeState],{cwd:root,windowsHide:true,stdio:['ignore','pipe','pipe']});
       proc.stdout.on('data',data=>{output+=data.toString('utf8');});
       proc.stderr.on('data',()=>{});
       proc.once('error',()=>resolve({ok:false,message:'本机发布程序未启动。'}));
@@ -52,9 +55,25 @@ else {
      return result;
     }finally{publishing=false;busy=false;}
    });
-   ipcMain.handle('archive:open-published',async event=>{
-    if(!valid(event))return;
-    await shell.openExternal('https://github.xialiwei.com/HOTPOOR-xialiwei/stories/'+encodeURIComponent(config.id)+'/');
+   ipcMain.handle('archive:open-published',async (event,id)=>{
+    if(!valid(event)||typeof id!=='string'||!/^[a-z0-9-]+$/.test(id))return;
+    await shell.openExternal('https://github.xialiwei.com/HOTPOOR-xialiwei/stories/'+encodeURIComponent(id)+'/');
+   });
+   const settings=()=>{const saved=JSON.parse(fs.readFileSync(configPath,'utf8'));return {tokenPath:saved.github_token_file||'',exists:fs.existsSync(saved.github_token_file||''),repository:'hotpoor/HOTPOOR-xialiwei'};};
+   ipcMain.handle('archive:settings',event=>{if(!valid(event))throw Error('请求不可用');return settings();});
+   ipcMain.handle('archive:choose-token',async event=>{
+    if(!valid(event)||busy)throw Error('请求不可用');
+    const result=await dialog.showOpenDialog(window,{title:'选择 GitHub Token 文件',properties:['openFile','showHiddenFiles']});
+    return result.canceled?null:result.filePaths[0];
+   });
+   ipcMain.handle('archive:save-token-path',(event,file)=>{
+    if(!valid(event)||busy||typeof file!=='string')return {ok:false,message:'当前无法保存设置。'};
+    const resolved=path.resolve(file.trim()),relative=path.relative(root,resolved);
+    if(!path.isAbsolute(file.trim())||(!relative.startsWith('..'+path.sep)&&relative!=='..'&&!path.isAbsolute(relative)))return {ok:false,message:'请选择仓库外的 Token 文件。'};
+    try{if(!fs.statSync(resolved).isFile())throw Error();}catch{return {ok:false,message:'文件不存在或不可访问，请检查路径。'};}
+    const saved=JSON.parse(fs.readFileSync(configPath,'utf8'));saved.github_token_file=resolved;
+    fs.writeFileSync(configPath+'.tmp',JSON.stringify(saved,null,2));fs.renameSync(configPath+'.tmp',configPath);
+    return {ok:true,message:'凭证文件位置已保存，仅保存在本机。',...settings()};
    });
    window.on('close',event=>{
     if(busy){event.preventDefault();dialog.showMessageBox(window,{type:'info',message:'正在同步，请等待结果后再关闭。'});}

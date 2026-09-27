@@ -13,7 +13,7 @@ const text='## 私密测试标题\n\n这是一段自动化测试内容。<script
 const secret='Test-only-long-passphrase-2026';
 let backend,server,window;
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
-async function waitFor(fn){for(let n=0;n<100;n++){if(await fn())return;await delay(100);}throw Error('UI timeout');}
+async function waitFor(fn){for(let n=0;n<100;n++){if(await fn())return;await delay(100);}throw Error('UI timeout: '+fn.toString());}
 app.whenReady().then(async()=>{
  try{
   assert(!fs.existsSync(target),'Synthetic output already exists');
@@ -23,6 +23,9 @@ app.whenReady().then(async()=>{
   backend=spawn(process.env.ARCHIVE_TEST_PYTHON||'python',['-u','scripts/private-editor.py','--id',id,'--draft',draft,'--state',state,'--metadata',metadata],{cwd:root,windowsHide:true,stdio:['ignore','pipe','pipe']});
   const origin=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Editor timeout')),20000);readline.createInterface({input:backend.stdout}).on('line',line=>{if(line.startsWith('Local editor ready: ')){clearTimeout(timer);resolve(line.slice(20));}});backend.on('error',reject);});
   let publishCalls=0;
+  ipcMain.handle('archive:settings',()=>({tokenPath:'C:/example/github.token',exists:true}));
+  ipcMain.handle('archive:choose-token',()=>null);
+  ipcMain.handle('archive:save-token-path',(_event,file)=>({ok:true,tokenPath:file,message:'测试位置已保存'}));
   ipcMain.handle('archive:publish',()=>{publishCalls++;return {ok:true,message:'模拟同步完成；未连接 GitHub。'};});
   window=new BrowserWindow({show:false,width:1100,height:900,webPreferences:{preload:path.join(root,'desktop/preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
   let saveBody='';
@@ -40,6 +43,20 @@ app.whenReady().then(async()=>{
   await window.webContents.executeJavaScript("document.querySelector('#publish').click()");
   await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#publish-status').textContent.includes('模拟同步完成')"));
   assert.equal(publishCalls,1);
+  assert.equal(await window.webContents.executeJavaScript("document.querySelector('#token-path').value"),'C:/example/github.token');
+  assert(await window.webContents.executeJavaScript("document.querySelectorAll('.document-item').length>1"));
+  await window.webContents.executeJavaScript("document.querySelector('#body').value='unsaved';document.querySelector('#body').dispatchEvent(new Event('input'));document.querySelector('#new-record').click()");
+  assert.equal(await window.webContents.executeJavaScript("document.querySelector('#body').value"),'unsaved');
+  await window.webContents.executeJavaScript("document.querySelector('#clear').click();document.querySelector('#new-record').click()");
+  await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#title').value==='新的记录'&&!document.querySelector('#new-record').disabled"));
+  assert.equal(await window.webContents.executeJavaScript("document.querySelector('#publish').disabled"),true);
+  await window.webContents.executeJavaScript("Array.from(document.querySelectorAll('.document-item')).find(b=>b.textContent.includes('加密测试')).click()");
+  await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#title').value==='加密测试'&&!document.querySelector('#new-record').disabled"));
+  assert.equal(await window.webContents.executeJavaScript("document.querySelector('#body').value"),'');
+  await window.webContents.executeJavaScript("Array.from(document.querySelectorAll('.document-item')).find(b=>b.textContent.includes('公开文章')).click()");
+  await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#body').readOnly"));
+  assert.equal(await window.webContents.executeJavaScript("document.querySelector('#save').disabled"),true);
+
   const bad=await fetch(origin+'/save',{method:'POST',headers:{Origin:'https://evil.invalid','Content-Type':'application/json'},body:'{}'});
   assert.equal(bad.status,403);
   assert.equal((await fetch(origin+'/draft')).status,403);

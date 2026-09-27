@@ -1,7 +1,6 @@
 """Loopback-only editor: read a private draft, accept ciphertext only; never accept a password."""
 import argparse
 import base64
-from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
@@ -40,7 +39,8 @@ def main():
     for private in (args.draft.resolve(), args.state.resolve()):
         if private.is_relative_to(ROOT):
             parser.error('Private draft and state must be outside repository')
-    envelope_path = ROOT / 'content/encrypted' / (args.id + '.json')
+    from archive_library import Library
+    library = Library(ROOT, args.metadata, args.draft, args.state, args.id)
     metadata = json.loads(args.metadata.read_text(encoding='utf-8'))
     metadata = {key: metadata[key] for key in ('title', 'summary', 'date', 'chapter')}
     token = secrets.token_urlsafe(32)
@@ -74,31 +74,40 @@ def main():
             self.wfile.write(data)
 
         def do_GET(self):
-            if not self.allowed(self.path in ('/draft', '/envelope')):
+            if not self.allowed(self.path in ('/draft', '/envelope', '/records')):
                 return self.respond({'error': 'Forbidden'}, status=403)
             if self.path in assets:
                 file, mime = assets[self.path]
                 return self.respond((ROOT / file).read_bytes(), mime)
             if self.path == '/session':
-                return self.respond({'token': token, 'id': args.id, 'metadata': metadata})
+                return self.respond({'token': token, 'id': library.selected, 'metadata': library.current()['metadata']})
             if self.path == '/draft':
-                return self.respond({'text': '' if envelope_path.exists() else args.draft.read_text(encoding='utf-8'), 'has_encrypted': envelope_path.exists()})
-            if self.path == '/envelope' and envelope_path.exists():
-                return self.respond(envelope_path.read_bytes())
+                return self.respond(library.current())
+            if self.path == '/records':
+                return self.respond({'records': library.listing()})
+            if self.path == '/envelope' and library.envelope(library.selected).exists():
+                return self.respond(library.envelope(library.selected).read_bytes())
             return self.respond({'error': 'Not found'}, status=404)
 
         def do_POST(self):
-            if self.path != '/save' or not self.allowed(True) or self.headers.get('Origin') != origin:
+            if self.path not in ('/save', '/select', '/new') or not self.allowed(True) or self.headers.get('Origin') != origin:
                 return self.respond({'error': 'Forbidden'}, status=403)
             try:
                 length = int(self.headers.get('Content-Length', '0'))
                 if not 0 < length <= 2000000:
                     raise ValueError('Size')
                 body = json.loads(self.rfile.read(length))
+                if self.path == '/select':
+                    return self.respond(library.select(body['id']))
+                if self.path == '/new':
+                    return self.respond(library.create())
+                if library.current()['readonly']:
+                    raise ValueError('Read-only public article')
+                envelope_path = library.envelope(library.selected)
                 if set(body) != {'envelope', 'metadata'}:
                     raise ValueError('Ciphertext only')
                 envelope = body['envelope']
-                validate_envelope(envelope, args.id)
+                validate_envelope(envelope, library.selected)
                 public = body['metadata']
                 if set(public) != {'title', 'summary'} or any(not isinstance(public[k], str) or not 0 < len(public[k]) <= limit for k, limit in [('title', 120), ('summary', 300)]):
                     raise ValueError('Invalid public metadata')
@@ -106,10 +115,7 @@ def main():
                 temporary = envelope_path.with_suffix('.tmp')
                 temporary.write_text(json.dumps(envelope, indent=2) + '\n', encoding='utf-8')
                 temporary.replace(envelope_path)
-                metadata.update(public)
-                state = {'saved': True, 'id': args.id, 'url': origin, 'metadata': metadata,
-                         'updated': datetime.now(timezone.utc).isoformat()}
-                args.state.write_text(json.dumps(state), encoding='utf-8')
+                library.saved(public)
                 return self.respond({'saved': True})
             except (ValueError, OSError, TypeError, KeyError):
                 return self.respond({'error': 'Ciphertext was not saved'}, status=400)
@@ -121,7 +127,7 @@ def main():
         prior = json.loads(args.state.read_text(encoding='utf-8'))
         if prior.get('id') == args.id and prior.get('metadata'):
             metadata.update(prior['metadata'])
-    args.state.write_text(json.dumps({'saved': envelope_path.exists(), 'id': args.id, 'url': origin, 'metadata': metadata}), encoding='utf-8')
+    args.state.write_text(json.dumps({'saved': library.envelope(library.selected).exists(), 'id': library.selected, 'url': origin, 'metadata': metadata}), encoding='utf-8')
     print('Local editor ready: ' + origin, flush=True)
     server.serve_forever()
 
