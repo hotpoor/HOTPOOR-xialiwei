@@ -1,8 +1,19 @@
 import {encryptRecord,decryptRecord} from '/crypto.mjs';
 const $=id=>document.getElementById(id),form=$('editor');
 let token='',recordId='',busy=false,generation=0,dirty=false;
+const passwordControls=['password','confirm'].map(id=>{
+ const input=$(id),toggle=document.querySelector(`[data-password-toggle="${id}"]`),count=$(id+'-count');
+ const update=()=>{count.textContent=`已输入 ${Array.from(input.value).length} 个字符`;};
+ const hide=()=>{input.type='password';toggle.setAttribute('aria-pressed','false');toggle.setAttribute('aria-label','显示口令');toggle.title='显示口令';};
+ input.addEventListener('input',update);
+ toggle.addEventListener('click',()=>{const show=input.type==='password';const start=input.selectionStart,end=input.selectionEnd;input.type=show?'text':'password';toggle.setAttribute('aria-pressed',String(show));toggle.setAttribute('aria-label',show?'隐藏口令':'显示口令');toggle.title=show?'隐藏口令':'显示口令';input.focus();input.setSelectionRange(start,end);});
+ return {reset(){input.value='';hide();update();},hide};
+});
+function clearPasswords(){passwordControls.forEach(control=>control.reset());}
+window.addEventListener('blur',()=>passwordControls.forEach(control=>control.hide()));
+
 function setBusy(value){busy=value;for(const id of ['body','title','summary','password','confirm'])$(id).readOnly=value;for(const id of ['save','load-encrypted','clear'])$(id).disabled=value;}
-function clear(){generation++;dirty=false;$('body').value='';$('password').value='';$('confirm').value='';}
+function clear(){generation++;dirty=false;$('body').value='';clearPasswords();}
 for(const id of ['body','title','summary']) $(id).addEventListener('input',()=>{dirty=true;});
 window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
 async function api(route,body){const r=await fetch(route,{method:body?'POST':'GET',headers:{'X-Editor-Token':token,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,cache:'no-store',credentials:'same-origin'});if(!r.ok)throw Error('本地服务请求失败');return r.json();}
@@ -21,7 +32,7 @@ form.addEventListener('submit',async e=>{e.preventDefault();if(busy)return;
 });
 $('load-encrypted').addEventListener('click',async()=>{if(busy)return;setBusy(true);let password=$('password').value;
  try{const envelope=await api('/envelope');$('body').value=await decryptRecord(envelope,password,recordId);$('status').textContent='已在本机解密，可继续编辑。';}catch{$('status').textContent='未能解密，请确认已保存过密文，并输入对应口令。';}
- finally{password='';$('password').value='';$('confirm').value='';setBusy(false);}
+ finally{password='';clearPasswords();setBusy(false);}
 });
 $('clear').addEventListener('click',()=>{clear();$('status').textContent='屏幕已清空，本地原始草稿和已保存密文未删除。';});
 window.addEventListener('pagehide',clear);
