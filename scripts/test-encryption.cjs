@@ -1,0 +1,21 @@
+const assert=require('node:assert/strict');
+const {randomBytes,webcrypto}=require('node:crypto');
+const {pathToFileURL}=require('node:url');
+const path=require('node:path');
+const {encrypt,decrypt,outsideRepo}=require('./encrypt-story.cjs');
+(async()=>{
+ const {decryptRecord,encryptRecord}=await import(pathToFileURL(path.resolve(__dirname,'../assets/private-crypto.mjs')));
+ const text='## 测试记录\n\n中文、emoji 🌱 和 <script> 不应被当成脚本。',id='test-private-record',secret='测试口令 '+randomBytes(32).toString('base64url');
+ const envelope=encrypt(text,id,secret);
+ assert.equal(decrypt(envelope,secret),text);
+ assert.equal(await decryptRecord(envelope,secret,id,webcrypto),text);
+ assert.notEqual(encrypt(text,id,secret).iv,envelope.iv);
+ const browserEnvelope=await encryptRecord(text,secret,id,webcrypto);
+ assert.equal(decrypt(browserEnvelope,secret),text);
+ await assert.rejects(()=>decryptRecord(envelope,randomBytes(32).toString('base64url'),id,webcrypto));
+ await assert.rejects(()=>decryptRecord(envelope,secret,'wrong-record',webcrypto));
+ const data=Buffer.from(envelope.ciphertext,'base64url');data[0]^=1;
+ await assert.rejects(()=>decryptRecord({...envelope,ciphertext:data.toString('base64url')},secret,id,webcrypto));
+ assert.throws(()=>outsideRepo(path.resolve(__dirname,'../README.md')));
+ console.log('Encryption: UTF-8 round trip, Web Crypto interoperability, unique nonce, wrong key, tamper and record binding passed.');
+})().catch(()=>{console.error('Encryption verification failed.');process.exitCode=1;});

@@ -125,6 +125,14 @@ def build_article(e):
     current = article_path(e)
     converter = markdown.Markdown(extensions=['toc', 'fenced_code', 'tables'], extension_configs={'toc': {'slugify': slugify_unicode}})
     rendered = converter.convert(body(e))
+    if e.get('encrypted_file'):
+        envelope = esc(rel(current, 'content/' + e['encrypted_file']), quote=True)
+        rendered += f'''<section class="private-record" data-private-record="{esc(e['id'], quote=True)}" data-envelope="{envelope}">
+<h2>解密阅读</h2><p>正文已加密。输入单独保存的口令，仅在当前浏览器内阅读。</p>
+<form autocomplete="off"><label for="record-key">阅读口令</label><input id="record-key" type="password" required autocomplete="off" spellcheck="false" autocapitalize="none" aria-describedby="private-status"><button type="submit">解密正文</button></form>
+<p id="private-status" role="status" aria-live="polite">口令不会保存到此网站，也不会随请求发送。</p><button type="button" data-lock hidden>重新锁定</button><div data-private-content hidden></div>
+<noscript><p>解密需要开启 JavaScript，并使用 HTTPS 或本机预览页面。</p></noscript></section>
+<script type="module" src="{rel(current, 'assets/private-story.mjs')}"></script>'''
     toc = '<details class="article-toc" open><summary>本篇目录</summary>' + converter.toc + '</details>'
     at = ENTRIES.index(e)
     adjacent = ''

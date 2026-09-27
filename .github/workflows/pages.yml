@@ -21,6 +21,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python scripts/build.py
       - run: python -m unittest discover -s tests
+      - run: node scripts/test-encryption.cjs
       - name: Verify committed Markdown editions
         run: git diff --exit-code -- history news chapters
       - uses: actions/configure-pages@v5

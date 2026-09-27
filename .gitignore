@@ -2,3 +2,7 @@ __pycache__/
 _site/
 .venv/
 test-results/
+.local/
+node_modules/
+dist/
+.private/

@@ -1,0 +1,8 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>本地记录编辑</title><link rel="stylesheet" href="/editor.css"><script type="module" src="/editor.mjs"></script></head>
+<body><main><p class="eyebrow">HOTPOOR · 仅在本机</p><h1>把记录写清楚，再加密保存</h1><p>正文和口令在本机处理。保存时只写入密文，点击同步后才发布到 GitHub。</p>
+<p id="status" role="status" aria-live="polite">正在载入本地草稿…</p>
+<form id="editor" autocomplete="off"><label for="title">公开标题</label><input id="title" maxlength="120" required><label for="summary">公开说明</label><input id="summary" maxlength="300" required><small>标题、日期和说明会公开；下面的正文才会加密。</small><label for="body">记录正文</label><textarea id="body" rows="24" spellcheck="false"></textarea>
+<div class="passwords"><div><label for="password">加密口令</label><input type="password" id="password" minlength="12" required autocomplete="new-password" spellcheck="false"><small>至少 12 个字符，建议使用较长、独有的口令。请自行保存，网站无法找回。</small></div><div><label for="confirm">再次输入口令</label><input type="password" id="confirm" minlength="12" required autocomplete="new-password"></div></div>
+<button id="save" type="submit">加密并保存密文</button><button type="button" id="load-encrypted">用口令解密已保存版本</button><button type="button" id="clear">清空屏幕</button></form>
+<section id="publish-panel" hidden><h2>同步到 GitHub</h2><p>完成加密保存后，只提交密文、公开说明和阅读目录。发布成功后，读者需输入口令才能阅读正文。</p><button id="publish" type="button" disabled>同步密文到 GitHub</button><button id="open-published" type="button">打开网页版本</button><p id="publish-status" role="status" aria-live="polite"></p></section>
+<p class="footnote">保存成功后，当前编辑区和口令框会清空。Git 管理密文版本；需要阅读时，在对应网页输入相同口令。更换口令不会撤回 Git 历史中的旧密文。</p></main></body></html>
