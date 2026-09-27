@@ -1,17 +1,35 @@
 # News · 最近的记录
 
-按时间逆序 · 第 1 / 6 页。同日条目按编辑顺序排列，不推断日内时间。
+按时间逆序 · 第 1 / 7 页。同日条目按编辑顺序排列，不推断日内时间。
 
 [章节目录](../chapters/README.md) · [History](../history/README.md)
 
-[第 1 页](README.md) · [第 2 页](page-2.md) · [第 3 页](page-3.md) · [第 4 页](page-4.md) · [第 5 页](page-5.md) · [第 6 页](page-6.md)
+[第 1 页](README.md) · [第 2 页](page-2.md) · [第 3 页](page-3.md) · [第 4 页](page-4.md) · [第 5 页](page-5.md) · [第 6 页](page-6.md) · [第 7 页](page-7.md)
 
 ## 目录
 
+- [2026-09-27 · 2026 年 9 月 27 日的记录](#2026-09-27-perspective)
 - [2026-09-26 · 我们要不断通过磨合，明白彼此的立场](#2026-09-26-understanding)
 - [2026-09-25 · 一个成功对照，让排查继续向前](#2026-09-25-debugging)
 - [2026-09-25 · 从识别效果，追到模型来源](#2026-09-25-model-evidence)
-- [2026-09-25 · SayAgain：先把表达说得更自然](#2026-09-25-sayagain)
+
+---
+
+<a id="2026-09-27-perspective"></a>
+
+## 2026 年 9 月 27 日的记录
+
+2026-09-27 · 记录日期 · 加密记录 · 整理于 2026-09-27
+
+[独立原稿](../content/stories/2026-09-27-perspective.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-27-perspective/index.html)
+
+### 加密保存的记录
+
+正文已加密，Git 和网页仅保存密文。
+
+请在本篇网页输入作者单独提供的口令，在浏览器本地解密阅读。口令不会发送到网站，也不会保存到浏览器存储。
+
+公开标题、日期和说明不在加密范围内。
 
 ---
 
@@ -138,44 +156,3 @@ SayAgain 的截图功能曾遇到问题。我们排查时，有一个重要线�
 - [产品推荐与来源说明](https://github.com/hotpoor/HOTPOOR-SayAgain/blob/ebc91fc8423fc00dd4be70412ef20b0883d90c03/docs/patchx-freenote.md)
 
 本文于 2026 年 9 月 26 日依据已有公开项目记录整理，不代表当天重新运行了模型测试。
-
----
-
-<a id="2026-09-25-sayagain"></a>
-
-## SayAgain：先把表达说得更自然
-
-2026.09.25 · 产品定位记录日 · 产品实践 · 整理于 2026-09-26
-
-[独立原稿](../content/stories/2026-09-25-sayagain.md) · [网页阅读](https://github.xialiwei.com/HOTPOOR-xialiwei/stories/2026-09-25-sayagain/index.html)
-
-### 先把表达说得更自然
-
-我正在做 SayAgain。它从真实交流中发现值得改进的表达，保留原来的意思，给出建议和解释，再让人用自己的声音听、跟读和练习。
-
-最重要的是表达优化。音频、录音、转写和人物资料，都要服务于使用者理解自己的表达、继续练习这件事。
-
-### 把优先级讲清楚
-
-2026 年 9 月 25 日，项目记录明确了四项产品优先级：
-
-1. 表达优化：理解怎么说更自然，以及为什么这样改。
-2. 用自己的声音：把优化后的表达变成可以听练的声音。
-3. 音频文件与录音：导入、转写、试听和校对。
-4. 声纹角色库：管理人物资料和会话中的人物关联。
-
-这些优先级也帮助我们调整产品介绍：不能让技术细节盖过使用者真正想完成的事。
-
-### 让过程可以回看
-
-SayAgain 保留原始表达和修改建议，也强调原音频、区间、文字和人工修改的对应关系。哪里是机器判断，哪里经过人确认，应当有记录。
-
-产品持续开发，已实现与待验证要分开说明。这里记录当时的方向与定位，最新功能状态以项目说明为准。
-
-### 公开来源
-
-- [SayAgain 项目](https://github.com/hotpoor/HOTPOOR-SayAgain)
-- [2026 年 9 月 25 日版本的产品说明](https://github.com/hotpoor/HOTPOOR-SayAgain/blob/ebc91fc8423fc00dd4be70412ef20b0883d90c03/README.md)
-- [当时的开发日志](https://github.com/hotpoor/HOTPOOR-SayAgain/blob/ebc91fc8423fc00dd4be70412ef20b0883d90c03/DEVELOPMENT_LOG.md)
-
-日期对应产品优先级的记录，不是项目成立日期。本文于 2026 年 9 月 26 日回溯整理。

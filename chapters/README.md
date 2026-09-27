@@ -60,3 +60,4 @@
 共同的立场，需要在每一次合作中落实。
 
 - [2026-09-26 · 我们要不断通过磨合，明白彼此的立场](../content/stories/2026-09-26-understanding.md)
+- [2026-09-27 · 2026 年 9 月 27 日的记录](../content/stories/2026-09-27-perspective.md)

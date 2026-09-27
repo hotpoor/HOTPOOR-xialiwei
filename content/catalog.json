@@ -1,7 +1,7 @@
 {
   "title": "HOTPOOR · XIALIWEI",
   "subtitle": "一些经历，一些实践，一次次把立场说清楚。",
-  "updated": "2026-09-26",
+  "updated": "2026-09-27",
   "site_url": "https://github.xialiwei.com/HOTPOOR-xialiwei/",
   "page_size": 4,
   "chapters": [
@@ -355,6 +355,18 @@
       "kind": "对话整理",
       "recorded": "2026-09-26",
       "file": "stories/2026-09-26-understanding.md"
+    },
+    {
+      "id": "2026-09-27-perspective",
+      "date": "2026-09-27",
+      "date_label": "2026-09-27 · 记录日期",
+      "chapter": "dialogue",
+      "title": "2026 年 9 月 27 日的记录",
+      "summary": "一份由本人保留的加密记录，输入口令后阅读。",
+      "kind": "加密记录",
+      "recorded": "2026-09-27",
+      "file": "stories/2026-09-27-perspective.md",
+      "encrypted_file": "encrypted/2026-09-27-perspective.json"
     }
   ]
 }

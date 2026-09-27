@@ -1,10 +1,10 @@
 # History · 一路走来
 
-按时间正序 · 第 6 / 6 页。同日条目按编辑顺序排列，不推断日内时间。
+按时间正序 · 第 6 / 7 页。同日条目按编辑顺序排列，不推断日内时间。
 
 [章节目录](../chapters/README.md) · [News](../news/README.md)
 
-[第 1 页](README.md) · [第 2 页](page-2.md) · [第 3 页](page-3.md) · [第 4 页](page-4.md) · [第 5 页](page-5.md) · [第 6 页](page-6.md)
+[第 1 页](README.md) · [第 2 页](page-2.md) · [第 3 页](page-3.md) · [第 4 页](page-4.md) · [第 5 页](page-5.md) · [第 6 页](page-6.md) · [第 7 页](page-7.md)
 
 ## 目录
 
