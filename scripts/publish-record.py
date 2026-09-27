@@ -1,4 +1,4 @@
-"""Publish one encrypted record; GitHub credentials remain in the local process."""
+"""Publish one public or encrypted record; GitHub credentials remain in the local process."""
 import argparse
 import base64
 import importlib.util
@@ -29,14 +29,16 @@ def publish(config_path, state_path):
     state = json.loads(state_path.read_text(encoding='utf-8'))
     record_id = config['id']
     if not re.fullmatch(r'[a-z0-9-]+', record_id) or state.get('id') != record_id or not state.get('saved'):
-        raise RuntimeError('请先在客户端加密保存正文。')
+        raise RuntimeError('请先在客户端保存正文。')
     if run(['git', 'remote', 'get-url', 'origin']) != REMOTE or run(['git', 'branch', '--show-current']) != 'main':
         raise RuntimeError('仓库或分支与预期不符，未发布。')
     envelope_name = 'content/encrypted/' + record_id + '.json'
-    envelope = json.loads((ROOT / envelope_name).read_text(encoding='utf-8'))
+    is_public = state.get('mode', 'encrypted') == 'public'
+    envelope = None if is_public else json.loads((ROOT / envelope_name).read_text(encoding='utf-8'))
     spec = importlib.util.spec_from_file_location('private_editor', ROOT / 'scripts/private-editor.py')
     editor = importlib.util.module_from_spec(spec); spec.loader.exec_module(editor)
-    editor.validate_envelope(envelope, record_id)
+    if not is_public:
+        editor.validate_envelope(envelope, record_id)
     placeholder = 'content/stories/' + record_id + '.md'
     def allowed(name):
         # Other encrypted drafts can stay unstaged while publishing this document.
@@ -61,12 +63,29 @@ def publish(config_path, state_path):
     metadata = state['metadata']
     catalog_path = ROOT / 'content/catalog.json'
     catalog = json.loads(catalog_path.read_text(encoding='utf-8'))
-    if metadata['chapter'] not in {c['id'] for c in catalog['chapters']} or not re.fullmatch(r'\d{4}-\d{2}-\d{2}', metadata['date']):
+    if metadata['chapter'] not in {c['id'] for c in catalog['chapters']} or not re.fullmatch(r'\d{4}(-\d{2}(-\d{2})?)?', metadata['date']):
         raise RuntimeError('公开目录信息无效。')
-    entry = {'id': record_id, 'date': metadata['date'], 'date_label': metadata['date'] + ' · 记录日期',
-             'chapter': metadata['chapter'], 'title': metadata['title'], 'summary': metadata['summary'],
-             'kind': '加密记录', 'recorded': metadata['date'], 'file': 'stories/' + record_id + '.md',
-             'encrypted_file': 'encrypted/' + record_id + '.json'}
+    existing = next((item for item in catalog['entries'] if item['id'] == record_id), None)
+    if existing and bool(existing.get('encrypted_file')) == is_public:
+        raise RuntimeError('记录类型不一致；不能把加密记录直接改为公开正文。')
+    if existing:
+        entry = dict(existing, title=metadata['title'], summary=metadata['summary'])
+    else:
+        entry = {'id': record_id, 'date': metadata['date'], 'date_label': metadata['date'] + ' · 记录日期',
+                 'chapter': metadata['chapter'], 'title': metadata['title'], 'summary': metadata['summary'],
+                 'kind': '公开记录' if is_public else '加密记录', 'recorded': metadata['date'], 'file': 'stories/' + record_id + '.md'}
+        if not is_public:
+            entry['encrypted_file'] = 'encrypted/' + record_id + '.json'
+    if is_public:
+        draft = Path(state['draft']).resolve()
+        if draft.is_relative_to(ROOT) or not draft.is_file():
+            raise RuntimeError('公开草稿位置无效。')
+        public_text = draft.read_text(encoding='utf-8')
+        if not public_text.strip():
+            raise RuntimeError('正文不能为空。')
+        placeholder = 'content/' + entry['file']
+        if not (ROOT / placeholder).resolve().is_relative_to((ROOT / 'content/stories').resolve()):
+            raise RuntimeError('文章路径无效。')
     for i, item in enumerate(catalog['entries']):
         if item['id'] == record_id:
             catalog['entries'][i] = entry
@@ -75,15 +94,18 @@ def publish(config_path, state_path):
         catalog['entries'].append(entry)
     catalog['updated'] = max(catalog['updated'], metadata['date'])
     catalog_path.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    (ROOT / placeholder).write_text('## 加密保存的记录\n\n正文已加密，Git 和网页仅保存密文。\n\n请在本篇网页输入作者单独提供的口令，在浏览器本地解密阅读。口令不会发送到网站，也不会保存到浏览器存储。\n\n公开标题、日期和说明不在加密范围内。\n', encoding='utf-8')
+    if is_public:
+        (ROOT / placeholder).write_text(public_text, encoding='utf-8')
+    else:
+        (ROOT / placeholder).write_text('## 加密保存的记录\n\n正文已加密，Git 和网页仅保存密文。\n\n请在本篇网页输入作者单独提供的口令，在浏览器本地解密阅读。口令不会发送到网站，也不会保存到浏览器存储。\n\n公开标题、日期和说明不在加密范围内。\n', encoding='utf-8')
     run([sys.executable, 'scripts/build.py'], label='网页构建')
     run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tests'], label='网页验证')
     node = config.get('node', 'node')
     run([node, 'scripts/test-encryption.cjs'], label='加密验证')
     run(['git', 'diff', '--check'], label='差异检查')
-    run(['git', 'add', '--', envelope_name, placeholder, 'content/catalog.json', 'history', 'news', 'chapters'], label='暂存本篇')
+    run(['git', 'add', '--', *([] if is_public else [envelope_name]), placeholder, 'content/catalog.json', 'history', 'news', 'chapters'], label='暂存本篇')
     if run(['git', 'diff', '--cached', '--name-only']):
-        run(['git', 'commit', '-m', 'Update encrypted record ' + record_id], label='提交本篇')
+        run(['git', 'commit', '-m', 'Update archive record ' + record_id], label='提交本篇')
     credential = Path(config['github_token_file'])
     if not credential.is_file():
         raise RuntimeError('本机登记的 GitHub 凭证文件不存在；本地提交已保留。')
@@ -115,15 +137,15 @@ def publish(config_path, state_path):
             job = next((r for r in runs if r['name'] == 'Publish reading archive'), None)
             if job and job['status'] == 'completed':
                 if job['conclusion'] != 'success':
-                    return {'ok': True, 'deployed': False, 'sha': sha, 'message': '密文已推送，但网页部署失败。请检查 GitHub Actions。'}
-                with urllib.request.urlopen(PUBLIC + envelope_name + '?v=' + sha, timeout=15) as response:
-                    published = json.load(response)
-                if published == envelope:
-                    return {'ok': True, 'deployed': True, 'sha': sha, 'url': url, 'message': '已发布并核对线上密文。提交 ' + sha[:7] + '，网页需输入口令阅读。'}
+                    return {'ok': True, 'deployed': False, 'sha': sha, 'message': '记录已推送，但网页部署失败。请检查 GitHub Actions。'}
+                with urllib.request.urlopen(PUBLIC + (placeholder if is_public else envelope_name) + '?v=' + sha, timeout=15) as response:
+                    published = response.read().decode('utf-8').replace('\r\n', '\n') if is_public else json.load(response)
+                if published == (public_text.replace('\r\n', '\n') if is_public else envelope):
+                    return {'ok': True, 'deployed': True, 'sha': sha, 'url': url, 'message': '已发布并核对线上正文。提交 ' + sha[:7] if is_public else '已发布并核对线上密文。提交 ' + sha[:7] + '，网页需输入口令阅读。'}
         except (OSError, ValueError, KeyError):
             pass
         time.sleep(10)
-    return {'ok': True, 'deployed': False, 'sha': sha, 'message': '密文已推送，网页部署尚未核实完成。请稍后查看 GitHub Actions。'}
+    return {'ok': True, 'deployed': False, 'sha': sha, 'message': '记录已推送，网页部署尚未核实完成。请稍后查看 GitHub Actions。'}
 
 
 if __name__ == '__main__':

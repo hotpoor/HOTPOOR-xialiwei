@@ -90,7 +90,7 @@ def main():
             return self.respond({'error': 'Not found'}, status=404)
 
         def do_POST(self):
-            if self.path not in ('/save', '/select', '/new') or not self.allowed(True) or self.headers.get('Origin') != origin:
+            if self.path not in ('/save', '/save-public', '/select', '/new') or not self.allowed(True) or self.headers.get('Origin') != origin:
                 return self.respond({'error': 'Forbidden'}, status=403)
             try:
                 length = int(self.headers.get('Content-Length', '0'))
@@ -100,9 +100,17 @@ def main():
                 if self.path == '/select':
                     return self.respond(library.select(body['id']))
                 if self.path == '/new':
-                    return self.respond(library.create())
-                if library.current()['readonly']:
-                    raise ValueError('Read-only public article')
+                    return self.respond(library.create(body.get('mode', 'encrypted')))
+                if self.path == '/save-public':
+                    if set(body) != {'text', 'metadata'} or not isinstance(body['text'], str) or not body['text'].strip():
+                        raise ValueError('Invalid public document')
+                    public = body['metadata']
+                    if set(public) != {'title', 'summary'} or any(not isinstance(public[k], str) or not 0 < len(public[k]) <= limit for k, limit in [('title', 120), ('summary', 300)]):
+                        raise ValueError('Invalid metadata')
+                    library.save_public(body['text'], public)
+                    return self.respond({'saved': True})
+                if library.current()['mode'] != 'encrypted':
+                    raise ValueError('Wrong document mode')
                 envelope_path = library.envelope(library.selected)
                 if set(body) != {'envelope', 'metadata'}:
                     raise ValueError('Ciphertext only')

@@ -27,7 +27,7 @@ else {
     child.once('error',()=>{clearTimeout(timer);reject(Error('无法启动本机 Python 环境。'));});
     child.once('exit',()=>{clearTimeout(timer);reject(Error('本机编辑服务已退出，请检查本地配置。'));});
    });
-   window=new BrowserWindow({width:1150,height:900,minWidth:620,minHeight:650,title:'HOTPOOR 记录',backgroundColor:'#f7f5ee',
+   window=new BrowserWindow({width:1150,height:900,minWidth:620,minHeight:650,title:'HOTPOOR 记录',backgroundColor:'#ffffff',
     webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,spellcheck:false}});
    window.setMenu(null);
    window.webContents.setWindowOpenHandler(()=>({action:'deny'}));

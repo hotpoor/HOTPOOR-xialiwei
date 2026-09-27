@@ -46,3 +46,15 @@ class LibraryTests(unittest.TestCase):
                 library.select('../outside')
             restarted = module.Library(root, config, draft, legacy, 'first')
             self.assertEqual(restarted.current()['metadata']['title'], 'Renamed')
+
+            public_id = library.create('public')['id']
+            library.save_public('Public draft fixture', {'title': 'Public', 'summary': 'Public summary'})
+            self.assertEqual(library.current()['mode'], 'public')
+            self.assertTrue(library.current()['saved'])
+            self.assertEqual(library.current()['text'], 'Public draft fixture')
+            self.assertFalse((root / 'content/stories' / (public_id + '.md')).exists())
+            library.select('first')
+            with self.assertRaises(ValueError):
+                library.save_public('Must not leak', {'title': 'X', 'summary': 'X'})
+            library.select(public_id)
+            self.assertEqual(library.current()['text'], 'Public draft fixture')

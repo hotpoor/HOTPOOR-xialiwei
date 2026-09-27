@@ -27,7 +27,7 @@ app.whenReady().then(async()=>{
   ipcMain.handle('archive:choose-token',()=>null);
   ipcMain.handle('archive:save-token-path',(_event,file)=>({ok:true,tokenPath:file,message:'测试位置已保存'}));
   ipcMain.handle('archive:publish',()=>{publishCalls++;return {ok:true,message:'模拟同步完成；未连接 GitHub。'};});
-  window=new BrowserWindow({show:false,width:1100,height:900,webPreferences:{preload:path.join(root,'desktop/preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
+  window=new BrowserWindow({show:false,width:1100,height:900,webPreferences:{offscreen:true,backgroundThrottling:false,preload:path.join(root,'desktop/preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
   let saveBody='';
   window.webContents.session.webRequest.onBeforeRequest((details,callback)=>{if(details.url===origin+'/save')saveBody=Buffer.concat((details.uploadData||[]).map(x=>x.bytes||Buffer.alloc(0))).toString();callback({});});
   await window.loadURL(origin+'/');
@@ -35,7 +35,7 @@ app.whenReady().then(async()=>{
   assert.equal(await window.webContents.executeJavaScript("document.querySelector('#body').value"),text);
   await window.webContents.executeJavaScript(`document.querySelector('#password').value=${JSON.stringify(secret)};document.querySelector('#confirm').value=${JSON.stringify(secret)};document.querySelector('#editor').requestSubmit();`);
   await waitFor(()=>fs.existsSync(target));
-  await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#body').value===''"));
+  await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#body').value===''&&!document.querySelector('#publish').disabled"));
   const envelope=JSON.parse(fs.readFileSync(target,'utf8'));
   assert.equal(decrypt(envelope,secret),text);
   assert(!saveBody.includes(secret)&&!saveBody.includes('私密测试标题'));
@@ -44,7 +44,7 @@ app.whenReady().then(async()=>{
   await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#publish-status').textContent.includes('模拟同步完成')"));
   assert.equal(publishCalls,1);
   assert.equal(await window.webContents.executeJavaScript("document.querySelector('#token-path').value"),'C:/example/github.token');
-  assert(await window.webContents.executeJavaScript("document.querySelectorAll('.document-item').length>1"));
+  assert(await window.webContents.executeJavaScript("Number(document.querySelector('#public-count').textContent)+Number(document.querySelector('#encrypted-count').textContent)>1"));
   await window.webContents.executeJavaScript("document.querySelector('#body').value='unsaved';document.querySelector('#body').dispatchEvent(new Event('input'));document.querySelector('#new-record').click()");
   assert.equal(await window.webContents.executeJavaScript("document.querySelector('#body').value"),'unsaved');
   await window.webContents.executeJavaScript("document.querySelector('#clear').click();document.querySelector('#new-record').click()");
@@ -53,14 +53,31 @@ app.whenReady().then(async()=>{
   await window.webContents.executeJavaScript("Array.from(document.querySelectorAll('.document-item')).find(b=>b.textContent.includes('加密测试')).click()");
   await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#title').value==='加密测试'&&!document.querySelector('#new-record').disabled"));
   assert.equal(await window.webContents.executeJavaScript("document.querySelector('#body').value"),'');
-  await window.webContents.executeJavaScript("Array.from(document.querySelectorAll('.document-item')).find(b=>b.textContent.includes('公开文章')).click()");
-  await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#body').readOnly"));
-  assert.equal(await window.webContents.executeJavaScript("document.querySelector('#save').disabled"),true);
-
+  await window.webContents.executeJavaScript("document.querySelector('#tab-public').click()");
+  await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#password-section').hidden&&!document.querySelector('#new-record').disabled"));
+  assert.equal(await window.webContents.executeJavaScript("document.querySelector('#body').readOnly"),false);
+  await window.webContents.executeJavaScript("document.querySelector('#new-record').click()");
+  await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#title').value==='新的记录'&&!document.querySelector('#new-record').disabled"));
+  await window.webContents.executeJavaScript("document.querySelector('#title').value='公开测试记录';document.querySelector('#body').value='## 公开测试\\n\\n这份虚构草稿只用于测试。';document.querySelector('#body').dispatchEvent(new Event('input'));document.querySelector('#editor').requestSubmit()");
+  await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#status').textContent.includes('公开草稿已保存')"));
+  assert.equal(await window.webContents.executeJavaScript("document.querySelector('#password').required"),false);
+  assert.equal(await window.webContents.executeJavaScript("document.querySelector('#publish').disabled"),false);
+  await window.webContents.executeJavaScript("document.querySelector('#publish').click()");
+  await waitFor(()=>publishCalls===2);
+  await waitFor(()=>window.webContents.executeJavaScript("!document.querySelector('#new-record').disabled"));
+  await window.webContents.executeJavaScript("document.querySelector('#tab-encrypted').click()");
+  await waitFor(()=>window.webContents.executeJavaScript("!document.querySelector('#password-section').hidden&&!document.querySelector('#new-record').disabled"));
+  await window.webContents.executeJavaScript("document.querySelector('#tab-public').click()");
+  await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#password-section').hidden&&!document.querySelector('#new-record').disabled"));
+  await window.webContents.executeJavaScript("Array.from(document.querySelectorAll('.document-item')).find(b=>b.textContent.includes('公开测试记录')).click()");
+  await waitFor(()=>window.webContents.executeJavaScript("document.querySelector('#title').value==='公开测试记录'&&!document.querySelector('#new-record').disabled"));
+  assert(await window.webContents.executeJavaScript("document.querySelector('#body').value.includes('虚构草稿')"));
   const bad=await fetch(origin+'/save',{method:'POST',headers:{Origin:'https://evil.invalid','Content-Type':'application/json'},body:'{}'});
   assert.equal(bad.status,403);
   assert.equal((await fetch(origin+'/draft')).status,403);
   fs.mkdirSync(path.join(root,'test-results'),{recursive:true});
+  window.webContents.invalidate();
+  await delay(500);
   fs.writeFileSync(path.join(root,'test-results/client-editor.png'),(await window.webContents.capturePage()).toPNG());
   server=http.createServer((req,res)=>{
    if(req.url==='/'){res.setHeader('Content-Type','text/html');res.end(`<section data-private-record="${id}" data-envelope="/cipher.json"><form><input type="password"><button>解密</button></form><p role="status"></p><button data-lock hidden>锁定</button><div data-private-content hidden></div></section><script type="module" src="/assets/private-story.mjs"></script>`);}
@@ -80,7 +97,7 @@ app.whenReady().then(async()=>{
   assert.equal(await window.webContents.executeJavaScript('localStorage.length+sessionStorage.length'),0);
   await window.webContents.executeJavaScript("document.querySelector('[data-lock]').click()");
   assert.equal(await window.webContents.executeJavaScript("document.querySelector('[data-private-content]').textContent"),'');
-  console.log('Client UI: editor, browser encryption, ciphertext-only save, CSRF checks, wrong password, safe rendering and re-lock passed.');
+  console.log('Client UI: public/encrypted tabs, public draft persistence, mocked publishing, encryption, CSRF, wrong password and re-lock passed.');
  }catch(error){console.error('Client verification failed:',error.message);process.exitCode=1;}
  finally{window?.destroy();backend?.kill();server?.close();if(fs.existsSync(target))fs.unlinkSync(target);app.exit(process.exitCode||0);}
 });
